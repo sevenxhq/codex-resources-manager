@@ -3,7 +3,7 @@ import { CodexResource } from "../types/codexResource";
 export class ExtensionProvider {
   static instance: ExtensionProvider;
   static registeredResources: {
-    [key: string]: CodexResource;
+    [key: string]: CodexResource<any>; //TODO: Fix this any
   };
 
   constructor() {
@@ -13,7 +13,7 @@ export class ExtensionProvider {
     ExtensionProvider.registeredResources = {};
   }
 
-  registerResource(resource: CodexResource) {
+  registerResource(resource: CodexResource<any>) {
     ExtensionProvider.registeredResources[resource.id] = resource;
   }
 

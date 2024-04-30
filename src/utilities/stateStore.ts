@@ -55,3 +55,5 @@ export async function initializeStateStore() {
     getStoreState,
   };
 }
+
+export type StateStore = Awaited<ReturnType<typeof initializeStateStore>>;

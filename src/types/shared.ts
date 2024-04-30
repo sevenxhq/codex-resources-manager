@@ -1,4 +1,5 @@
-export type ResourceDisplay = {
+export type ResourceDisplay<FullResource> = {
+  id: string;
   name: string;
   version: {
     tag: string;
@@ -9,4 +10,6 @@ export type ResourceDisplay = {
     url: string;
     avatarUrl: string;
   };
+  fullResource: FullResource;
+  resourceType: string;
 };

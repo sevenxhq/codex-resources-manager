@@ -20,6 +20,7 @@ export enum MessageType {
   SYNC_TA_CONTENT = "sync-ta-content",
   GET_USFM = "get-usfm",
   SCROLL_TO_CHAPTER = "scrollToChapter",
+  SET_CURRENT_RESOURCE_TYPE = "set-current-resource-type",
 }
 
 export type OBSRef = {

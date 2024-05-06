@@ -1,10 +1,14 @@
 {
   "name": "codex-resources",
-  "displayName": "codex resources",
+  "displayName": "Codex resources Manager",
   "description": "Base for codex resources development in vscode",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.85.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sevenxhq/codex-resources-manager.git"
   },
   "categories": [
     "Other"

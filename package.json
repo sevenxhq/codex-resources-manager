@@ -3,6 +3,7 @@
   "displayName": "Codex resources Manager",
   "description": "Base for codex resources development in vscode",
   "version": "0.0.1",
+  "publisher": "sevenx-codex",
   "engines": {
     "vscode": "^1.85.0"
   },

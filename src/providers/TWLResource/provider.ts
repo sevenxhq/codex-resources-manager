@@ -96,13 +96,13 @@ export class TWLResource implements CodexResource<Twl> {
     resource,
     helpers
   ) => {
-    helpers.renderInWebview(
-      (webviewPanel) => {
+    helpers.renderInWebview({
+      handler: (webviewPanel) => {
         webviewPanel.webview.onDidReceiveMessage((e) =>
           handleResourceWebviewMessages(e, webviewPanel.webview.postMessage)
         );
       },
-      (webview, extensionUri) => {
+      getWebviewContent: (webview, extensionUri) => {
         // The CSS file from the React build output
         const stylesUri = getUri(webview, extensionUri, [
           "ui",
@@ -146,7 +146,7 @@ export class TWLResource implements CodexResource<Twl> {
         </body>
       </html>`;
       },
-      async (webviewPanel) => {
+      onWebviewVisible: async (webviewPanel) => {
         helpers.stateStore.storeListener("verseRef", async (verseRefStore) => {
           console.log("Opening TWL resource on verseRef change");
           const wordsList = await getVerseTranslationWordsList(
@@ -177,8 +177,8 @@ export class TWLResource implements CodexResource<Twl> {
             wordsList: wordsList,
           },
         });
-      }
-    );
+      },
+    });
   };
 
   getTableDisplayData = async () => {

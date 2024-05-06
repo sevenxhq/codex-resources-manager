@@ -25,11 +25,11 @@ export interface CodexResource<FullResource extends {} = {}> {
   openResource: (
     resource: DownloadedResource,
     helpers: {
-      renderInWebview: (
-        handler: RenderWebviewHandler,
-        getWebviewContent: GetWebviewContent,
-        onWebviewVisible?: RenderWebviewHandler
-      ) => void;
+      renderInWebview: (fns: {
+        handler: RenderWebviewHandler;
+        getWebviewContent: GetWebviewContent;
+        onWebviewVisible?: RenderWebviewHandler;
+      }) => void;
       stateStore: StateStore;
     }
   ) => Promise<void>;

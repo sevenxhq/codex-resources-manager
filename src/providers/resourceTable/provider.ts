@@ -210,11 +210,15 @@ export class ResourcesProvider implements vscode.WebviewViewProvider {
     }
     const resourceHandler = this._registeredResources[resource.type];
 
-    const renderInWebview = (
-      handler: RenderWebviewHandler,
-      getWebviewContent: GetWebviewContent,
-      onWebviewVisible?: RenderWebviewHandler
-    ) => {
+    const renderInWebview = ({
+      handler,
+      getWebviewContent,
+      onWebviewVisible,
+    }: {
+      handler: RenderWebviewHandler;
+      getWebviewContent: GetWebviewContent;
+      onWebviewVisible?: RenderWebviewHandler;
+    }) => {
       const webviewProvider = ResourceWebviewProvider.createOrShow(
         this.context.extensionUri,
         {

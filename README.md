@@ -28,6 +28,13 @@ _*NB*_: For the correct types to use for the properties, you can use the types l
 
 - (TWL Resource)[https://github.com/sevenxhq/codex-resources-manager/blob/1066f2017cf17f2b68da7c6e15760f6f6f0bc16f/src/providers/TWLResource/provider.ts]
 
+4. Call the API method called `registerResource`, the following snippet is a registration example. After that, your resource will be registered
+
+```typescript
+api.registerResource(new TnResource());
+```
+
+
 ## Features
 
 - Allows management of resources for codex

@@ -2,7 +2,7 @@
   "name": "codex-resources",
   "displayName": "Codex resources Manager",
   "description": "Base for codex resources development in vscode",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "sevenx-codex",
   "engines": {
     "vscode": "^1.85.0"
@@ -61,6 +61,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "bible-reference-range": "^1.1.1",
     "jszip": "^3.10.1",
     "moment": "^2.30.1"
   }

@@ -5,21 +5,17 @@ import { vscode } from "../utilities/vscode";
 
 const queryClient = new QueryClient();
 const Providers = ({
-    children,
+  children,
 }: {
-    children: React.ReactNode | React.ReactNode[];
+  children: React.ReactNode | React.ReactNode[];
 }) => {
-    useEffect(() => {
-        vscode.setMessageListeners((e) => {
-            console.log("providers - e received:", e.type);
-        });
-    }, []);
+  useEffect(() => {
+    vscode.setMessageListeners(() => {});
+  }, []);
 
-    return (
-        <QueryClientProvider client={queryClient}>
-            {children}
-        </QueryClientProvider>
-    );
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 };
 
 export default Providers;

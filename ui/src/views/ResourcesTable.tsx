@@ -154,7 +154,6 @@ const useResourcesTypes = () => {
     vscode.setMessageListeners((event) => {
       switch (event.data.type) {
         case "SET_RESOURCES_TYPES":
-          console.log("event.data.payload.resourcesTypes", event.data.payload);
           setResourcesTypes(event.data.payload.resourcesTypes ?? []);
           break;
       }
@@ -173,7 +172,6 @@ const useResourceTableData = () => {
     vscode.setMessageListeners((event) => {
       switch (event.data.type) {
         case "SET_RESOURCE_TABLE_DATA":
-          console.log("event.data.payload.tableData", event.data.payload);
           setResourceTableData(event.data.payload.tableData ?? []);
           break;
       }
@@ -192,10 +190,6 @@ const useDownloadedResources = () => {
     vscode.setMessageListeners((event) => {
       switch (event.data.type) {
         case "SET_DOWNLOADED_RESOURCES":
-          console.log(
-            "event.data.payload.downloadedResources",
-            event.data.payload
-          );
           setDownloadedResources(event.data.payload.downloadedResources ?? []);
           break;
       }

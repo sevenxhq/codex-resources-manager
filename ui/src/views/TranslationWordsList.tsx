@@ -94,17 +94,11 @@ const useTranslationWordsList = () => {
     vscode.setMessageListeners((event) => {
       switch (event.data.type) {
         case "update-twl":
-          console.log(
-            "update-twl ---> IN WEBVIEW",
-            event.data.payload.wordsList
-          );
           setTranslationWordsList(event.data.payload.wordsList ?? []);
           break;
       }
     });
   }, []);
-
-  console.log("translationWordsList", translationWordsList);
 
   const existingTranslationWordsList = useMemo(() => {
     return translationWordsList.filter((word) => word.existsOnDisk);

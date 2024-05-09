@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  bible-reference-range:
+    specifier: ^1.1.1
+    version: 1.1.1
   jszip:
     specifier: ^3.10.1
     version: 3.10.1
@@ -20,7 +23,7 @@ devDependencies:
     specifier: 18.x
     version: 18.19.31
   '@types/vscode':
-    specifier: ^1.88.0
+    specifier: ^1.85.0
     version: 1.88.0
   '@typescript-eslint/eslint-plugin':
     specifier: ^6.13.1
@@ -648,6 +651,10 @@ packages:
   /balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
     dev: true
+
+  /bible-reference-range@1.1.1:
+    resolution: {integrity: sha512-rEHpdcTrlJcLP/KuSl5hJjPND3EBD67m81hvDrSbZ48xyE1r6V7qgxUacDY2ZfT6nu1pBTkc6JizH9a+m3LMRQ==}
+    dev: false
 
   /binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}

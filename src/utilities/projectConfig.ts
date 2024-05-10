@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
-import { DownloadedResource } from "../types/codexResource";
+import { ConfigResourceValues } from "../types/codexResource";
 import { fileExists } from ".";
 
 const CONFIG_FILE_NAME = "scribe.config.json";
 
 export const addDownloadedResourceToProjectConfig = async (
-  resource: DownloadedResource
+  resource: ConfigResourceValues
 ) => {
   const projectURI = vscode.workspace.workspaceFolders?.[0].uri;
 

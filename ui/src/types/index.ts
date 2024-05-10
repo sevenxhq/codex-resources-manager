@@ -19,6 +19,9 @@ export enum MessageType {
   GET_TA_FOLDER_CONTENT = "get-ta-FolderContent",
   GET_TA_CONTENT = "get-ta-content",
   SET_CURRENT_RESOURCE_TYPE = "set-current-resource-type",
+  GET_OFFLINE_RESOURCE_IMPORT_URI = "get-offline-resource-import-uri",
+  SET_OFFLINE_RESOURCE_IMPORT_URI = "set-offline-resource-import-uri",
+  ADD_OFFLINE_RESOURCE = "add-offline-resource",
 }
 
 export type Language = {

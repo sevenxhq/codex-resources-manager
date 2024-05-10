@@ -1,5 +1,5 @@
 import { Uri } from "vscode";
-import { CodexResource, DownloadedResource } from "../../types/codexResource";
+import { CodexResource, ConfigResourceValues } from "../../types/codexResource";
 import { Twl, TwlApiResponse } from "./types";
 import moment from "moment";
 import JSZip from "jszip";
@@ -10,6 +10,7 @@ import { getVerseTranslationWordsList } from "./utils";
 export class TWLResource implements CodexResource<Twl> {
   id = "codex.twl";
   displayLabel = "Translation Words List";
+  supportsOfflineImport = true;
 
   downloadResource: CodexResource<Twl>["downloadResource"] = async (
     fullResource,
@@ -68,7 +69,7 @@ export class TWLResource implements CodexResource<Twl> {
 
     const localPath: string = resourceReturn?.folder.path;
 
-    const downloadedResource: DownloadedResource = {
+    const downloadedResource: ConfigResourceValues = {
       name: resourceReturn?.resource.name ?? "",
       id: String(resourceReturn?.resource.id) ?? "",
       localPath: localPath,
@@ -78,18 +79,6 @@ export class TWLResource implements CodexResource<Twl> {
     };
 
     return downloadedResource;
-  };
-
-  getResources = async () => {
-    return Promise.resolve();
-  };
-
-  getResourceById = async () => {
-    return Promise.resolve();
-  };
-
-  getResourceDisplayData = async () => {
-    return Promise.resolve();
   };
 
   openResource: CodexResource<Twl>["openResource"] = async (
@@ -148,7 +137,6 @@ export class TWLResource implements CodexResource<Twl> {
       },
       onWebviewVisible: async (webviewPanel) => {
         helpers.stateStore.storeListener("verseRef", async (verseRefStore) => {
-          console.log("Opening TWL resource on verseRef change");
           const wordsList = await getVerseTranslationWordsList(
             resource,
             verseRefStore?.verseRef ?? "GEN 1:1"
@@ -163,13 +151,10 @@ export class TWLResource implements CodexResource<Twl> {
         const verseRefStore = await helpers.stateStore?.getStoreState(
           "verseRef"
         );
-        console.log("Opening TWL resource", verseRefStore?.verseRef);
         const wordsList = await getVerseTranslationWordsList(
           resource,
           verseRefStore?.verseRef ?? "GEN 1:1"
         );
-
-        console.log("TWL wordsList", wordsList);
 
         webviewPanel.webview.postMessage({
           type: "update-twl",
@@ -208,6 +193,47 @@ export class TWLResource implements CodexResource<Twl> {
 
     return [];
   };
+
+  getOfflineImportMetadata: CodexResource<Twl>["getOfflineImportMetadata"] =
+    async (params) => {
+      const { fs, resourceUri } = params;
+
+      const metadataUri = Uri.joinPath(resourceUri, "metadata.json");
+
+      const metadataFile = await fs.readFile(metadataUri);
+      const metadataJson = JSON.parse(metadataFile.toString());
+      const metadata = metadataJson.meta as Twl;
+      return {
+        ...metadata,
+        name: metadata?.name,
+        id: String(metadata?.id),
+        version: metadata?.release?.tag_name,
+      };
+    };
+
+  getOfflineConfigResourceValues: CodexResource<Twl>["getOfflineConfigResourceValues"] =
+    async (params) => {
+      const { fs, resourceUri } = params;
+
+      const metadataUri = Uri.joinPath(resourceUri, "metadata.json");
+
+      const metadataFile = await fs.readFile(metadataUri);
+      const metadataJson = JSON.parse(metadataFile.toString());
+      const metadata = metadataJson.meta as Twl;
+
+      const localPath: string = resourceUri.fsPath;
+
+      const downloadedResource: ConfigResourceValues = {
+        name: metadata?.name ?? "",
+        id: String(metadata?.id) ?? "",
+        localPath: localPath,
+        type: this.id,
+        remoteUrl: metadata?.url ?? "",
+        version: metadata?.release?.tag_name,
+      };
+
+      return downloadedResource;
+    };
 }
 
 const handleResourceWebviewMessages = async (

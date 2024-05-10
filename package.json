@@ -2,7 +2,7 @@
   "name": "codex-resources",
   "displayName": "Codex resources Manager",
   "description": "Base for codex resources development in vscode",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "sevenx-codex",
   "engines": {
     "vscode": "^1.85.0"
@@ -64,5 +64,8 @@
     "bible-reference-range": "^1.1.1",
     "jszip": "^3.10.1",
     "moment": "^2.30.1"
-  }
+  },
+  "extensionDependencies": [
+    "project-accelerate.shared-state-store"
+  ]
 }

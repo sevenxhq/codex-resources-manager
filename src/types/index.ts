@@ -21,6 +21,9 @@ export enum MessageType {
   GET_USFM = "get-usfm",
   SCROLL_TO_CHAPTER = "scrollToChapter",
   SET_CURRENT_RESOURCE_TYPE = "set-current-resource-type",
+  GET_OFFLINE_RESOURCE_IMPORT_URI = "get-offline-resource-import-uri",
+  SET_OFFLINE_RESOURCE_IMPORT_URI = "set-offline-resource-import-uri",
+  ADD_OFFLINE_RESOURCE = "add-offline-resource",
 }
 
 export type OBSRef = {

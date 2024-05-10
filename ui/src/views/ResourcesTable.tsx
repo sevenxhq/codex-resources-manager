@@ -3,15 +3,24 @@ import {
   VSCodeDropdown,
   VSCodeOption,
 } from "@vscode/webview-ui-toolkit/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { vscode } from "../utilities/vscode";
 import { renderToPage } from "../utilities/main-vscode";
 import { ResourceDisplay } from "../../../src/types/shared";
 import { DownloadedResource, MessageType } from "../types";
 
+declare module "react" {
+  interface InputHTMLAttributes<T> extends HTMLAttributes<T> {
+    webkitdirectory?: boolean;
+  }
+}
+
 const ResourcesTable = () => {
   const { resourcesTypes } = useResourcesTypes();
-  const [selectedResourceType, setSelectedResourceType] = useState<string>("");
+  const initRef = useRef(false);
+  const [selectedResourceType, setSelectedResourceType] = useState<string>(
+    resourcesTypes[0]?.value ?? ""
+  );
 
   const { resourceTableData } = useResourceTableData();
 
@@ -23,6 +32,18 @@ const ResourcesTable = () => {
       payload: { resourceType: selectedResourceType },
     });
   }, [selectedResourceType]);
+
+  useEffect(() => {
+    if (resourcesTypes.length === 0) {
+      return;
+    }
+
+    if (!initRef.current) {
+      initRef.current = true;
+      setSelectedResourceType(resourcesTypes[0].value);
+      return;
+    }
+  }, [resourcesTypes]);
 
   const handleDownload = (
     resource: ResourceDisplay<Record<string, any>>,
@@ -50,6 +71,9 @@ const ResourcesTable = () => {
     });
   };
 
+  const { importedOfflineResource, handleImportResource, handleAddResource } =
+    useImportOfflineResource();
+
   return (
     <div>
       <div className="flex justify-between w-full">
@@ -68,6 +92,33 @@ const ResourcesTable = () => {
           ))}
         </VSCodeDropdown>
       </div>
+      {importedOfflineResource ? (
+        <div className="flex flex-col">
+          <h1>Selected Resource:</h1>
+          <div className="flex flex-col">
+            <p>Name: {importedOfflineResource.metadata.name}</p>
+            <p>ID: {importedOfflineResource.metadata.id}</p>
+            <p>Version: {importedOfflineResource.metadata.version}</p>
+            <p>Path: {importedOfflineResource.path}</p>
+            <VSCodeButton
+              onClick={() => handleAddResource(selectedResourceType)}
+            >
+              <i className="codicon codicon-cloud-download"></i> Import Resource
+            </VSCodeButton>
+          </div>
+        </div>
+      ) : (
+        <div className="flex justify-between">
+          <span>Import Resources</span>
+          <button
+            onClick={() => {
+              handleImportResource({ selectedResourceType });
+            }}
+          >
+            Select Directory
+          </button>
+        </div>
+      )}
       <table className="table-auto w-full">
         <thead className="font-semibold">
           <tr>
@@ -197,4 +248,55 @@ const useDownloadedResources = () => {
   }, []);
 
   return { downloadedResources };
+};
+
+const useImportOfflineResource = () => {
+  const [importedOfflineResource, setImportedOfflineResource] = useState<{
+    path: string;
+    fsPath: string;
+    metadata: {
+      name: string;
+      id: string;
+      version: string;
+      [x: string]: any;
+    };
+  } | null>(null);
+
+  const handleImportResource = ({
+    selectedResourceType,
+  }: {
+    selectedResourceType: string;
+  }) => {
+    vscode.postMessage({
+      type: MessageType.GET_OFFLINE_RESOURCE_IMPORT_URI,
+      payload: {
+        selectedResourceType,
+      },
+    });
+  };
+
+  const handleAddResource = (selectedResourceType: string) => {
+    vscode.postMessage({
+      type: MessageType.ADD_OFFLINE_RESOURCE,
+      payload: {
+        path: importedOfflineResource?.path,
+        fsPath: importedOfflineResource?.fsPath,
+        metadata: importedOfflineResource?.metadata,
+        selectedResourceType: selectedResourceType,
+      },
+    });
+    setImportedOfflineResource(null);
+  };
+
+  useEffect(() => {
+    vscode.setMessageListeners((event) => {
+      switch (event.data.type) {
+        case MessageType.SET_OFFLINE_RESOURCE_IMPORT_URI:
+          setImportedOfflineResource(event.data.payload ?? null);
+          break;
+      }
+    });
+  }, []);
+
+  return { importedOfflineResource, handleImportResource, handleAddResource };
 };

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { fileExists } from "../../utilities";
-import { DownloadedResource } from "../../types/codexResource";
+import { ConfigResourceValues } from "../../types/codexResource";
 
 const CONFIG_FILE_NAME = "scribe.config.json";
 export const getDownloadedResourcesFromProjectConfig = async () => {
@@ -23,5 +23,5 @@ export const getDownloadedResourcesFromProjectConfig = async () => {
     config = JSON.parse(new TextDecoder().decode(configFile));
   }
 
-  return (config.resources ?? []) as DownloadedResource[];
+  return (config.resources ?? []) as ConfigResourceValues[];
 };

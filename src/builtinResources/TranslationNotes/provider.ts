@@ -1,7 +1,7 @@
 import JSZip from "jszip";
 import moment from "moment";
 import { FileSystem, Uri, window, workspace } from "vscode";
-import { CodexResource, DownloadedResource } from "../../types/codexResource";
+import { CodexResource, ConfigResourceValues } from "../../types/codexResource";
 import {
   ScriptureTSV,
   TnResourceType,
@@ -71,7 +71,7 @@ export class TnResource implements CodexResource<TnResourceType> {
 
     const localPath: string = resourceReturn?.folder.path;
 
-    const downloadedResource: DownloadedResource = {
+    const downloadedResource: ConfigResourceValues = {
       name: resourceReturn?.resource.name ?? "",
       id: String(resourceReturn?.resource.id) ?? "",
       localPath: localPath,
@@ -115,12 +115,12 @@ export class TnResource implements CodexResource<TnResourceType> {
           "assets",
           "index.css",
         ]);
-        // const codiconFontUri = getUri(webview, extensionUri, [
-        //   "node_modules",
-        //   "@vscode/codicons",
-        //   "dist",
-        //   "codicon.css",
-        // ]);
+        const codiconFontUri = getUri(webview, extensionUri, [
+          "node_modules",
+          "@vscode/codicons",
+          "dist",
+          "codicon.css",
+        ]);
 
         const nonce = getNonce();
 
@@ -134,11 +134,9 @@ export class TnResource implements CodexResource<TnResourceType> {
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
           <link rel="stylesheet" type="text/css" href="${stylesUri}">
           <title>Translation Notes</title>
-
         </head>
         <body>
           <div id="root"></div>
-          <div> IT:S SOO RENDERIGN "Translation Notes" </div>
           <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
         </body>
       </html>

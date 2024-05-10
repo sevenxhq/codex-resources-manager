@@ -1,6 +1,6 @@
 {
   "name": "@codex-extensions/resource-manager-types",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Types for codex-resource-manager vscode extension to allow easy dev usage while extending the resources.",
   "main": "dist/types.js",
   "types": "dist/types.d.ts",

@@ -1,11 +1,11 @@
-import { DownloadedResource } from "../../types/codexResource";
+import { ConfigResourceValues } from "../../types/codexResource";
 import * as vscode from "vscode";
 
 import { ChapterVerseRef, TwlTsvRow } from "./types";
 import { fileExists } from "../../utilities";
 
 export const getVerseTranslationWordsList = async (
-  resource: DownloadedResource,
+  resource: ConfigResourceValues,
   verseRef: string
 ) => {
   const { bookID, chapter, verse } = extractBookChapterVerse(verseRef);
@@ -56,7 +56,7 @@ export const getVerseTranslationWordsList = async (
 };
 
 export const convertTwlRCUriToScribeResourceUri = async (
-  resource: DownloadedResource,
+  resource: ConfigResourceValues,
   uri: string = ""
 ): Promise<vscode.Uri> => {
   const workspaceRootUri = vscode.workspace.workspaceFolders?.[0]

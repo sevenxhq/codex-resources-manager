@@ -9,7 +9,7 @@ export function activate(context: vscode.ExtensionContext) {
   let disposable = vscode.commands.registerCommand(
     "codex-resources.helloWorld",
     () => {
-      vscode.window.showInformationMessage("Hello World from codex resources!");
+      vscode.window.showInformationMessage("Hello World from Codex Resources!");
     }
   );
 
@@ -17,6 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(ResourcesProvider.register(context));
   extensionProvider.registerResource(new TWLResource());
   extensionProvider.registerResource(new TnResource());
+
   return extensionProvider;
 }
 export function deactivate() {}

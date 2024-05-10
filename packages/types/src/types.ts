@@ -11,17 +11,18 @@ export type GetWebviewContent = (
   extensionUri: vscode.Uri
 ) => string;
 
-export interface CodexResource<FullResource extends {} = {}> {
+export type CodexResource<FullResource extends {} = {}> = {
   id: string;
   displayLabel: string;
+
+  supportsOfflineImport?: boolean;
   downloadResource: (
     fullResource: FullResource,
     utils: DownloadResourceUtils
-  ) => Promise<DownloadedResource>;
-  getResourceById: () => Promise<void>;
+  ) => Promise<ConfigResourceValues>;
   getTableDisplayData: () => Promise<ResourceDisplay<FullResource>[]>;
   openResource: (
-    resource: DownloadedResource,
+    resource: ConfigResourceValues,
     helpers: {
       renderInWebview: (fns: {
         handler: RenderWebviewHandler;
@@ -31,9 +32,22 @@ export interface CodexResource<FullResource extends {} = {}> {
       stateStore: StateStore;
     }
   ) => Promise<void>;
-}
+  getOfflineImportMetadata?: (params: {
+    resourceUri: vscode.Uri;
+    fs: vscode.FileSystem;
+  }) => Promise<{
+    name: string;
+    id: string;
+    version: string;
+    [x: string]: any;
+  }>;
+  getOfflineConfigResourceValues?: (params: {
+    resourceUri: vscode.Uri;
+    fs: vscode.FileSystem;
+  }) => Promise<ConfigResourceValues>;
+};
 
-export type DownloadedResource = {
+export type ConfigResourceValues = {
   name: string;
   id: string;
   localPath: string;

@@ -4,7 +4,7 @@ import { ExtensionProvider } from "../extensionProvider";
 import { addDownloadedResourceToProjectConfig } from "../../utilities/projectConfig";
 import { MessageType } from "../../types";
 import {
-  DownloadedResource,
+  ConfigResourceValues,
   GetWebviewContent,
   RenderWebviewHandler,
 } from "../../types/codexResource";
@@ -72,10 +72,76 @@ export class ResourcesProvider implements vscode.WebviewViewProvider {
           break;
 
         case MessageType.OPEN_RESOURCE: {
-          console.log("OPEN_RESOURCE: ", e.payload.resource);
           await this._openResource(e.payload.resource);
           break;
         }
+
+        case MessageType.GET_OFFLINE_RESOURCE_IMPORT_URI: {
+          const selectedResourceType = e.payload.selectedResourceType;
+          const uri = await this._getOfflineImportUri();
+
+          const resourceType = this._registeredResources[selectedResourceType];
+          if (!uri) {
+            return;
+          }
+
+          if (!resourceType) {
+            return;
+          }
+
+          const metadata = await resourceType
+            ?.getOfflineImportMetadata?.({
+              resourceUri: uri,
+              fs: vscode.workspace.fs,
+            })
+            .catch(() => {
+              vscode.window.showErrorMessage(
+                "Unable to get metadata for the selected resource"
+              );
+            });
+          webviewPanel.webview.postMessage({
+            type: MessageType.SET_OFFLINE_RESOURCE_IMPORT_URI,
+            payload: {
+              path: uri?.path,
+              fsPath: uri?.fsPath,
+              metadata,
+            },
+          });
+        }
+        case MessageType.ADD_OFFLINE_RESOURCE:
+          {
+            const resource = e.payload;
+            const resources = this._registeredResources;
+            const resourceHandler = resources[resource.selectedResourceType];
+
+            if (!resourceHandler) {
+              vscode.window.showErrorMessage("Resource type not found");
+              return;
+            }
+
+            const resourceValues = await resourceHandler
+              ?.getOfflineConfigResourceValues?.({
+                resourceUri: vscode.Uri.file(resource.fsPath),
+                fs: vscode.workspace.fs,
+              })
+              .catch(() => {
+                vscode.window.showErrorMessage(
+                  "Unable to get resource values for the selected resource"
+                );
+              });
+
+            if (!resourceValues) {
+              vscode.window.showErrorMessage(
+                "Resource values not found for the selected resource"
+              );
+              return;
+            }
+
+            await addDownloadedResourceToProjectConfig(resourceValues);
+
+            break;
+          }
+          break;
         default:
           break;
       }
@@ -204,7 +270,7 @@ export class ResourcesProvider implements vscode.WebviewViewProvider {
     return downloadedResources ?? [];
   }
 
-  async _openResource(resource: DownloadedResource) {
+  async _openResource(resource: ConfigResourceValues) {
     if (!this.stateStore) {
       this.stateStore = await initializeStateStore();
     }
@@ -271,5 +337,20 @@ export class ResourcesProvider implements vscode.WebviewViewProvider {
         downloadedResources: await this._getDownloadedResources(),
       },
     });
+  }
+
+  private async _getOfflineImportUri() {
+    const selectedPaths = await vscode.window.showOpenDialog({
+      canSelectFiles: false,
+      canSelectFolders: true,
+      canSelectMany: false,
+      title: "Select a directory for your resource",
+      openLabel: "Select resource",
+    });
+
+    if (!selectedPaths || selectedPaths.length === 0) {
+      return null;
+    }
+    return selectedPaths[0];
   }
 }

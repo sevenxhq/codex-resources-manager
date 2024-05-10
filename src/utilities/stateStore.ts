@@ -35,7 +35,9 @@ export async function initializeStateStore() {
   if (extension) {
     const api = await extension.activate();
     if (!api) {
-      console.log(`Extension ${extensionId} does not expose an API.`);
+      vscode.window.showErrorMessage(
+        `Extension ${extensionId} does not expose an API. Please make sure it is up to date.`
+      );
     } else {
       storeListener = api.storeListener;
 

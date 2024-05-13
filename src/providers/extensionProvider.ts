@@ -8,10 +8,23 @@ import {
 import { initializeStateStore } from "../utilities/stateStore";
 import { ResourceWebviewProvider } from "./ResourceWebviewProvider/provider";
 
+import EventEmitter from "node:events";
+
+const registeredResourcesEventsEmitter = new EventEmitter();
 export class ExtensionProvider {
   static instance: ExtensionProvider;
   static registeredResources: {
     [key: string]: CodexResource<any>; //TODO: Fix this any
+  };
+
+  static listenForResourcesRegistration = (
+    listener: (resources: {
+      [key: string]: CodexResource<any>; //TODO: Fix this any
+    }) => void
+  ) => {
+    registeredResourcesEventsEmitter.on("registerResource", () => {
+      listener(ExtensionProvider.registeredResources);
+    });
   };
 
   static async openResource(resource: ConfigResourceValues, extensionUri: Uri) {
@@ -62,6 +75,7 @@ export class ExtensionProvider {
 
   registerResource(resource: CodexResource<any>) {
     ExtensionProvider.registeredResources[resource.id] = resource;
+    registeredResourcesEventsEmitter.emit("registerResource");
   }
 
   getInstance() {

@@ -6,12 +6,6 @@ import {
   getDownloadedResourcesFromProjectConfig,
 } from "../../utilities/projectConfig";
 import { MessageType } from "../../types";
-import {
-  ConfigResourceValues,
-  GetWebviewContent,
-  RenderWebviewHandler,
-} from "../../types/codexResource";
-import { ResourceWebviewProvider } from "../ResourceWebviewProvider/provider";
 import { StateStore, initializeStateStore } from "../../utilities/stateStore";
 export class ResourcesProvider implements vscode.WebviewViewProvider {
   private _webviewView: vscode.WebviewView | undefined;
@@ -54,6 +48,10 @@ export class ResourcesProvider implements vscode.WebviewViewProvider {
     // Receive message from the webview.
     webviewPanel.webview.onDidReceiveMessage(async (e) => {
       switch (e.type) {
+        case MessageType.INIT_DATA: {
+          this._initializeWebviewData();
+          break;
+        }
         case MessageType.SET_CURRENT_RESOURCE_TYPE:
           webviewPanel.webview.postMessage({
             type: "SET_RESOURCE_TABLE_DATA",
@@ -155,6 +153,14 @@ export class ResourcesProvider implements vscode.WebviewViewProvider {
     this._webviewView = webviewPanel;
 
     await this._initializeWebviewData();
+
+    ExtensionProvider.listenForResourcesRegistration((resources) => {
+      this._registeredResources = resources;
+
+      if (this._webviewView) {
+        this._initializeWebviewData();
+      }
+    });
 
     webviewPanel.onDidChangeVisibility(() => {
       if (webviewPanel.visible) {

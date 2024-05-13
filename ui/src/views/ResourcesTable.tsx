@@ -46,7 +46,7 @@ const ResourcesTable = () => {
   }, [resourcesTypes]);
 
   const handleDownload = (
-    resource: ResourceDisplay<Record<string, any>>,
+    resource: ResourceDisplay<Record<string, unknown>>,
     resourceType: string
   ) => {
     vscode.postMessage({
@@ -80,9 +80,14 @@ const ResourcesTable = () => {
         Filter Resources
         <VSCodeDropdown
           className="w-1/2"
-          onInput={(e: any) => {
-            //FIXME: type
-            setSelectedResourceType(e.target.value);
+          onInput={(e) => {
+            setSelectedResourceType(
+              (
+                e.target as unknown as {
+                  value: string;
+                }
+              ).value
+            );
           }}
         >
           {resourcesTypes.map((type) => (
@@ -210,6 +215,7 @@ const useResourcesTypes = () => {
           break;
       }
     });
+    vscode.postMessage({ type: MessageType.INIT_DATA, payload: {} });
   }, []);
 
   return { resourcesTypes, setResourcesTypes };
@@ -217,7 +223,7 @@ const useResourcesTypes = () => {
 
 const useResourceTableData = () => {
   const [resourceTableData, setResourceTableData] = useState<
-    ResourceDisplay<Record<string, any>>[] // FIXME: type fullResource
+    ResourceDisplay<Record<string, unknown>>[] // FIXME: type fullResource
   >([]);
 
   useEffect(() => {
@@ -259,7 +265,7 @@ const useImportOfflineResource = () => {
       name: string;
       id: string;
       version: string;
-      [x: string]: any;
+      [x: string]: unknown;
     };
   } | null>(null);
 

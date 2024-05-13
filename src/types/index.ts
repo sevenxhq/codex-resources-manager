@@ -24,6 +24,7 @@ export enum MessageType {
   GET_OFFLINE_RESOURCE_IMPORT_URI = "get-offline-resource-import-uri",
   SET_OFFLINE_RESOURCE_IMPORT_URI = "set-offline-resource-import-uri",
   ADD_OFFLINE_RESOURCE = "add-offline-resource",
+  INIT_DATA = "initialize-data",
 }
 
 export type OBSRef = {

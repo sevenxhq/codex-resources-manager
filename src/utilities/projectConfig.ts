@@ -65,5 +65,5 @@ export const getDownloadedResourcesFromProjectConfig = async () => {
     config = JSON.parse(new TextDecoder().decode(configFile));
   }
 
-  return config.resources ?? [];
+  return (config.resources ?? []) as ConfigResourceValues[];
 };

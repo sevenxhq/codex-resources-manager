@@ -1,7 +1,10 @@
 import * as vscode from "vscode";
 import { getNonce, getUri } from "../../utilities";
 import { ExtensionProvider } from "../extensionProvider";
-import { addDownloadedResourceToProjectConfig } from "../../utilities/projectConfig";
+import {
+  addDownloadedResourceToProjectConfig,
+  getDownloadedResourcesFromProjectConfig,
+} from "../../utilities/projectConfig";
 import { MessageType } from "../../types";
 import {
   ConfigResourceValues,
@@ -9,7 +12,6 @@ import {
   RenderWebviewHandler,
 } from "../../types/codexResource";
 import { ResourceWebviewProvider } from "../ResourceWebviewProvider/provider";
-import { getDownloadedResourcesFromProjectConfig } from "./utils";
 import { StateStore, initializeStateStore } from "../../utilities/stateStore";
 export class ResourcesProvider implements vscode.WebviewViewProvider {
   private _webviewView: vscode.WebviewView | undefined;
@@ -24,7 +26,7 @@ export class ResourcesProvider implements vscode.WebviewViewProvider {
     return providerRegistration;
   }
 
-  private static readonly viewType = "scribe.resources";
+  private static readonly viewType = "codex.resources.all";
 
   constructor(private readonly context: vscode.ExtensionContext) {
     this._registeredResources = ExtensionProvider.registeredResources;
@@ -72,7 +74,10 @@ export class ResourcesProvider implements vscode.WebviewViewProvider {
           break;
 
         case MessageType.OPEN_RESOURCE: {
-          await this._openResource(e.payload.resource);
+          await ExtensionProvider.openResource(
+            e.payload.resource,
+            this.context.extensionUri
+          );
           break;
         }
 
@@ -268,45 +273,6 @@ export class ResourcesProvider implements vscode.WebviewViewProvider {
     const downloadedResources = await getDownloadedResourcesFromProjectConfig();
 
     return downloadedResources ?? [];
-  }
-
-  async _openResource(resource: ConfigResourceValues) {
-    if (!this.stateStore) {
-      this.stateStore = await initializeStateStore();
-    }
-    const resourceHandler = this._registeredResources[resource.type];
-
-    const renderInWebview = ({
-      handler,
-      getWebviewContent,
-      onWebviewVisible,
-    }: {
-      handler: RenderWebviewHandler;
-      getWebviewContent: GetWebviewContent;
-      onWebviewVisible?: RenderWebviewHandler;
-    }) => {
-      const webviewProvider = ResourceWebviewProvider.createOrShow(
-        this.context.extensionUri,
-        {
-          viewType: resourceHandler.id,
-          title: resourceHandler.displayLabel,
-        },
-        {
-          getWebviewContent,
-          onWebviewVisible,
-        }
-      );
-
-      if (!webviewProvider) {
-        throw new Error("Webview not found");
-      }
-      handler(webviewProvider.panel);
-    };
-
-    resourceHandler.openResource(resource, {
-      renderInWebview,
-      stateStore: this.stateStore,
-    });
   }
 
   private async _initializeWebviewData() {

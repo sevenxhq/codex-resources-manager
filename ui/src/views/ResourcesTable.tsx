@@ -103,20 +103,21 @@ const ResourcesTable = () => {
             <VSCodeButton
               onClick={() => handleAddResource(selectedResourceType)}
             >
-              <i className="codicon codicon-cloud-download"></i> Import Resource
+              <i className="codicon codicon-cloud-upload"></i>
             </VSCodeButton>
           </div>
         </div>
       ) : (
-        <div className="flex justify-between">
-          <span>Import Resources</span>
-          <button
+        <div className="flex justify-between mt-2">
+          <div className="min-w-2">Import Resources</div>
+          <VSCodeButton
             onClick={() => {
               handleImportResource({ selectedResourceType });
             }}
+            className="min-w-28"
           >
-            Select Directory
-          </button>
+            <i className="codicon codicon-cloud-upload"></i>
+          </VSCodeButton>
         </div>
       )}
       <table className="table-auto w-full">
@@ -164,7 +165,7 @@ const ResourcesTable = () => {
                       handleDownload(resource, resource.resourceType)
                     }
                   >
-                    <i className="codicon codicon-cloud-download"></i> Download
+                    <i className="codicon codicon-cloud-download"></i>
                   </VSCodeButton>
                 ) : (
                   <VSCodeButton
@@ -179,7 +180,7 @@ const ResourcesTable = () => {
                       )
                     }
                   >
-                    <i className="codicon codicon-eye"></i> Open
+                    <i className="codicon codicon-eye"></i>
                   </VSCodeButton>
                 )}
               </td>

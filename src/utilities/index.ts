@@ -38,7 +38,7 @@ export function getUri(
 }
 
 export const VIEW_TYPES = {
-  RESOURCES: "scribe.resources",
+  RESOURCES: "codex.resources.all",
 } as const;
 
 import * as vscode from "vscode";

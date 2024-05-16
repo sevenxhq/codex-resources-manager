@@ -31,16 +31,20 @@ export class ResourceWebviewProvider {
     const column = vscode.ViewColumn.Beside;
 
     // If we already have a panel, show it.
-    if (ResourceWebviewProvider.currentPanel) {
+    if (
+      ResourceWebviewProvider.currentPanel &&
+      ResourceWebviewProvider.currentPanel.panel.viewType === options.viewType
+    ) {
       ResourceWebviewProvider.currentPanel.panel.reveal(column);
       return ResourceWebviewProvider.currentPanel;
     }
 
     // Otherwise, create a new panel.
+
     const panel = vscode.window.createWebviewPanel(
       options.viewType,
       options.title,
-      column || vscode.ViewColumn.One,
+      column ?? vscode.ViewColumn.One,
       {
         enableScripts: true,
         localResourceRoots: [extensionUri],

@@ -4,6 +4,7 @@ import { TWLResource } from "./providers/TWLResource/provider";
 import { ResourcesProvider } from "./providers/resourceTable/provider";
 import { TnResource } from "./builtinResources/TranslationNotes/provider";
 import { AddedResourcesProvider } from "./providers/AddedResources/provider";
+import { BibleUsfmResource } from "./builtinResources/usfmViewer/provider";
 
 export function activate(context: vscode.ExtensionContext) {
   const extensionProvider = new ExtensionProvider();
@@ -20,6 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   extensionProvider.registerResource(new TWLResource());
   extensionProvider.registerResource(new TnResource());
+  extensionProvider.registerResource(new BibleUsfmResource());
 
   return extensionProvider;
 }

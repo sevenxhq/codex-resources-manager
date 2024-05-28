@@ -1,4 +1,4 @@
-import { Uri } from "vscode";
+import { Uri, window, workspace } from "vscode";
 import {
   CodexResource,
   ConfigResourceValues,
@@ -60,9 +60,15 @@ export class ExtensionProvider {
       handler(webviewProvider.panel);
     };
 
+    const currentWorkingFolderUri = workspace.workspaceFolders?.[0].uri;
+
     resourceHandler.openResource(resource, {
       renderInWebview,
       stateStore: stateStore,
+      fs: workspace.fs,
+      currentResourceUri: resource.localPath.startsWith("/.project")
+        ? Uri.joinPath(currentWorkingFolderUri!, resource.localPath)
+        : Uri.from({ path: resource.localPath, scheme: "file" }),
     });
   }
 

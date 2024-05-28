@@ -32,6 +32,8 @@ export type CodexResource<FullResource extends {} = {}> = {
         onWebviewVisible?: RenderWebviewHandler;
       }) => void;
       stateStore: StateStore;
+      currentResourceUri: vscode.Uri;
+      fs: vscode.FileSystem;
     }
   ) => Promise<void>;
   getOfflineImportMetadata?: (params: {

@@ -14,6 +14,7 @@ import { directoryExists, fileExists } from "../../utilities";
 import md5 from "md5";
 
 import CUSTOM_LICENSE from "./customLicense.md";
+
 import path from "path";
 
 export const downloadBibleResource: CodexResource<BibleResource>["downloadResource"] =

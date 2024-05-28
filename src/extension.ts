@@ -6,6 +6,7 @@ import { TnResource } from "./builtinResources/TranslationNotes/provider";
 import { AddedResourcesProvider } from "./providers/AddedResources/provider";
 import { BibleUsfmResource } from "./builtinResources/usfmViewer/provider";
 import { TAResource } from "./builtinResources/TranslationAcademy/provider";
+import { TWResource } from "./builtinResources/TranslationWords/provider";
 
 export function activate(context: vscode.ExtensionContext) {
   const extensionProvider = new ExtensionProvider();
@@ -24,6 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
   extensionProvider.registerResource(new TnResource());
   extensionProvider.registerResource(new BibleUsfmResource());
   extensionProvider.registerResource(new TAResource());
+  extensionProvider.registerResource(new TWResource());
 
   return extensionProvider;
 }

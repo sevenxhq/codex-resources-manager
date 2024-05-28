@@ -16,7 +16,6 @@ export const usfm2perf = (usfm: string) => {
     id = perfResultDocument.id;
     docSetId = perfResultDocument.docSetId;
   } catch (e) {
-    console.log(e);
     perf = null;
   }
   return { perf, docSetId, id };

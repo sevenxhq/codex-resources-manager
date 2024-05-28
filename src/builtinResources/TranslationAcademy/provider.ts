@@ -37,16 +37,16 @@ export class TAResource implements CodexResource<TAResourceType> {
     const result = await JSZip.loadAsync(fileContents);
     const keys = Object.keys(result.files);
 
-    let parentDir = "";
     for (const key of keys) {
       const item = result.files[key];
-      if (item.dir) {
-        parentDir = item.name;
-      } else {
+      if (!item.dir) {
         const bufferContent = Buffer.from(await item.async("arraybuffer"));
-        const path = [...item?.name?.replace(parentDir, "")?.split("/")];
-        path.shift();
-        const fileUri = Uri.joinPath(downloadResourceFolder, path.join("/"));
+        const fileName = [...item?.name?.split("/")];
+        fileName.shift();
+        const fileUri = Uri.joinPath(
+          downloadResourceFolder,
+          fileName.join("/")
+        );
         await fs.writeFile(fileUri, bufferContent);
       }
     }
@@ -218,29 +218,3 @@ export class TAResource implements CodexResource<TAResourceType> {
     return [];
   };
 }
-
-// const getDocumentAsScriptureTSV = async (
-//   verseRef: string,
-//   resourceUri: Uri,
-//   fs: FileSystem
-// ): Promise<ScriptureTSV> => {
-//   const { bookID } = extractBookChapterVerse(verseRef);
-
-//   const docUri = Uri.joinPath(resourceUri, `tn_${bookID}.tsv`);
-
-//   const doc = await fs.readFile(docUri);
-
-//   const text = doc.toString();
-
-//   if (text.trim().length === 0) {
-//     return {};
-//   }
-
-//   try {
-//     return tsvStringToScriptureTSV(text);
-//   } catch {
-//     throw new Error(
-//       "Could not get document as json. Content is not valid scripture TSV"
-//     );
-//   }
-// };

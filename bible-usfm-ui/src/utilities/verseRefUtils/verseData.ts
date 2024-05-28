@@ -46,7 +46,6 @@ export function getChapters(book: string): {
   chapterCount: number;
 } {
   const bookData = vrefData[book];
-  console.log({ book, bookData });
   return {
     chapters: Object.keys(bookData.chapters),
     chapterCount: bookData.chapterCount,

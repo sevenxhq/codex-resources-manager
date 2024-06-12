@@ -84,7 +84,11 @@ export class ExtensionProvider {
     registeredResourcesEventsEmitter.emit("registerResource");
   }
 
-  getInstance() {
+  getRegisteredResourceHandler(id: string) {
+    return ExtensionProvider.registeredResources[id];
+  }
+
+  static getInstance() {
     if (!ExtensionProvider.instance) {
       ExtensionProvider.instance = new ExtensionProvider();
     }

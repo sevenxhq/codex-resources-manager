@@ -64,12 +64,27 @@ export class ResourcesProvider implements vscode.WebviewViewProvider {
 
           break;
 
-        case MessageType.DOWNLOAD_RESOURCE:
+        case MessageType.DOWNLOAD_RESOURCE: {
+          vscode.window.showInformationMessage(
+            e.payload.fullResource?.name
+              ? `Downloading resource ${e.payload.fullResource?.name} ...`
+              : "Downloading resource ..."
+          );
           await this._downloadResource(
             e.payload.resourceType,
             e.payload.fullResource
           );
+
+          const downloadedResources = await this._getDownloadedResources();
+
+          webviewPanel.webview.postMessage({
+            type: "SET_DOWNLOADED_RESOURCES",
+            payload: {
+              downloadedResources: downloadedResources,
+            },
+          });
           break;
+        }
 
         case MessageType.OPEN_RESOURCE: {
           await ExtensionProvider.openResource(
@@ -241,38 +256,42 @@ export class ResourcesProvider implements vscode.WebviewViewProvider {
 
   // TODO: type fullResource
   async _downloadResource(resourceId: string, fullResource: any) {
-    const resources = this._registeredResources;
-    const resource = resources[resourceId];
+    try {
+      const resources = this._registeredResources;
+      const resource = resources[resourceId];
 
-    const fs = vscode.workspace.fs;
-    const currentFolderURI = vscode.workspace.workspaceFolders?.[0].uri;
+      const fs = vscode.workspace.fs;
+      const currentFolderURI = vscode.workspace.workspaceFolders?.[0].uri;
 
-    if (!currentFolderURI) {
-      await vscode.window.showErrorMessage(
-        "Please open a workspace folder to download resources"
+      if (!currentFolderURI) {
+        await vscode.window.showErrorMessage(
+          "Please open a workspace folder to download resources"
+        );
+        return;
+      }
+
+      const resourceFolderUri = vscode.Uri.joinPath(
+        currentFolderURI,
+        ".project",
+        "resources"
       );
-      return;
+
+      const downloadedResource = await resource.downloadResource(fullResource, {
+        fs,
+        resourceFolderUri,
+      });
+
+      const updatedDownloadedResourcePath = {
+        ...downloadedResource,
+        localPath: downloadedResource.localPath.includes(currentFolderURI.path)
+          ? downloadedResource.localPath.replace(currentFolderURI.path, "")
+          : downloadedResource.localPath,
+      };
+
+      addDownloadedResourceToProjectConfig(updatedDownloadedResourcePath);
+    } catch (error) {
+      await vscode.window.showErrorMessage("Unable to download resource ...");
     }
-
-    const resourceFolderUri = vscode.Uri.joinPath(
-      currentFolderURI,
-      ".project",
-      "resources"
-    );
-
-    const downloadedResource = await resource.downloadResource(fullResource, {
-      fs,
-      resourceFolderUri,
-    });
-
-    const updatedDownloadedResourcePath = {
-      ...downloadedResource,
-      localPath: downloadedResource.localPath.includes(currentFolderURI.path)
-        ? downloadedResource.localPath.replace(currentFolderURI.path, "")
-        : downloadedResource.localPath,
-    };
-
-    addDownloadedResourceToProjectConfig(updatedDownloadedResourcePath);
   }
 
   async _getDownloadedResources() {

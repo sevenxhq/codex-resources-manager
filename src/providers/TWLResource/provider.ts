@@ -6,7 +6,8 @@ import JSZip from "jszip";
 import { getNonce, getUri } from "../../utilities";
 import { MessageType } from "../../types";
 import * as vscode from "vscode";
-import { getVerseTranslationWordsList } from "./utils";
+import { getLinkedTwResource, getVerseTranslationWordsList } from "./utils";
+import { ExtensionProvider } from "../extensionProvider";
 export class TWLResource implements CodexResource<Twl> {
   id = "codex.twl";
   displayLabel = "Translation Words List";
@@ -24,12 +25,17 @@ export class TWLResource implements CodexResource<Twl> {
 
     await fs.createDirectory(downloadResourceFolder);
 
+    console.log(`Downloading Zip ${fullResource?.name}...`);
+
     const res = await fetch(fullResource?.zipball_url);
     const blob = await res.arrayBuffer();
 
     const zipUri = Uri.joinPath(resourceFolderUri, `${fullResource?.name}.zip`);
 
     await fs.writeFile(zipUri, Buffer.from(blob));
+
+    console.log("Finished downloading Zip");
+    console.log("Decompressing Zip");
 
     const fileContents = blob;
     const result = await JSZip.loadAsync(fileContents);
@@ -50,6 +56,8 @@ export class TWLResource implements CodexResource<Twl> {
       }
     }
 
+    console.log("Finished decompressing Zip");
+
     const metadataRes = await fetch(fullResource.metadata_json_url);
     const data = (await metadataRes.json()) as Record<string, any>;
     data.agOffline = true;
@@ -61,6 +69,36 @@ export class TWLResource implements CodexResource<Twl> {
     );
     await fs.delete(zipUri);
 
+    const extensionProvider = ExtensionProvider.getInstance();
+
+    const twHandler =
+      extensionProvider.getRegisteredResourceHandler("codex.tw");
+
+    vscode.window.showInformationMessage(
+      "Downloading linked resource for Translation Words List"
+    );
+
+    const linkedResource = await getLinkedTwResource(fullResource);
+
+    let linkedDownloadResponse = null;
+
+    if (linkedResource) {
+      linkedDownloadResponse = await twHandler.downloadResource(
+        linkedResource.fullResource,
+        {
+          resourceFolderUri: resourceFolderUri,
+          fs: fs,
+        }
+      );
+      vscode.window.showInformationMessage(
+        "Linked resource for Translation Words List downloaded successfully"
+      );
+    } else {
+      vscode.window.showErrorMessage(
+        "Unable to download linked resource for Translation Words List"
+      );
+    }
+
     const resourceReturn = {
       resource: fullResource,
       folder: downloadResourceFolder,
@@ -69,6 +107,16 @@ export class TWLResource implements CodexResource<Twl> {
 
     const localPath: string = resourceReturn?.folder.path;
 
+    const currentFolderURI = vscode.workspace.workspaceFolders?.[0].uri;
+
+    if (!currentFolderURI) {
+      vscode.window.showErrorMessage(
+        "Please open a workspace folder to download resources"
+      );
+
+      throw new Error("No workspace folder found");
+    }
+
     const downloadedResource: ConfigResourceValues = {
       name: resourceReturn?.resource.name ?? "",
       id: String(resourceReturn?.resource.id) ?? "",
@@ -76,6 +124,14 @@ export class TWLResource implements CodexResource<Twl> {
       type: resourceReturn?.type ?? "",
       remoteUrl: resourceReturn?.resource.url ?? "",
       version: resourceReturn?.resource.release.tag_name,
+      linkedTw: linkedDownloadResponse && {
+        ...linkedDownloadResponse,
+        localPath: linkedDownloadResponse.localPath.includes(
+          currentFolderURI.path
+        )
+          ? linkedDownloadResponse.localPath.replace(currentFolderURI.path, "")
+          : linkedDownloadResponse.localPath,
+      },
     };
 
     return downloadedResource;
@@ -86,11 +142,7 @@ export class TWLResource implements CodexResource<Twl> {
     helpers
   ) => {
     helpers.renderInWebview({
-      handler: (webviewPanel) => {
-        webviewPanel.webview.onDidReceiveMessage((e) =>
-          handleResourceWebviewMessages(e, webviewPanel.webview.postMessage)
-        );
-      },
+      handler: (webviewPanel) => {},
       getWebviewContent: (webview, extensionUri) => {
         // The CSS file from the React build output
         const stylesUri = getUri(webview, extensionUri, [
@@ -161,6 +213,65 @@ export class TWLResource implements CodexResource<Twl> {
           payload: {
             wordsList: wordsList,
           },
+        });
+
+        webviewPanel.webview.onDidReceiveMessage(async (e) => {
+          switch (e.type) {
+            case MessageType.GET_TW_CONTENT: {
+              try {
+                const translationWord: {
+                  path: string;
+                } = (e.payload as Record<string, any>)?.translationWord;
+
+                if (!translationWord) {
+                  return;
+                }
+
+                const path = translationWord.path;
+
+                if (!path) {
+                  return;
+                }
+
+                try {
+                  const content = await vscode.workspace.fs.readFile(
+                    vscode.Uri.file(path)
+                  );
+                  webviewPanel.webview.postMessage({
+                    type: "update-tw-content",
+                    payload: {
+                      content: content.toString(),
+                    },
+                  });
+                } catch (e: any) {
+                  vscode.window.showErrorMessage(
+                    "Unable to read the given translation word: " + e?.message
+                  );
+                  webviewPanel.webview.postMessage({
+                    type: "update-tw-content",
+                    payload: {
+                      error: e?.message,
+                      content: null,
+                    },
+                  });
+                }
+              } catch (error: any) {
+                vscode.window.showErrorMessage(
+                  "Unable to read the given translation word: " + error?.message
+                );
+                webviewPanel.webview.postMessage({
+                  type: "update-tw-content",
+                  payload: {
+                    error: "Not found",
+                  },
+                });
+              }
+              break;
+            }
+            default: {
+              break;
+            }
+          }
         });
       },
     });
@@ -235,65 +346,3 @@ export class TWLResource implements CodexResource<Twl> {
       return downloadedResource;
     };
 }
-
-const handleResourceWebviewMessages = async (
-  e: {
-    type: MessageType;
-    payload: unknown;
-  },
-  postWebviewMessage: (message: any) => void
-) => {
-  switch (e.type) {
-    case MessageType.GET_TW_CONTENT: {
-      try {
-        const translationWord: {
-          path: string;
-        } = (e.payload as Record<string, any>)?.translationWord;
-
-        if (!translationWord) {
-          return;
-        }
-
-        const path = translationWord.path;
-
-        if (!path) {
-          return;
-        }
-
-        try {
-          const content = await vscode.workspace.fs.readFile(
-            vscode.Uri.file(path)
-          );
-          postWebviewMessage({
-            type: "update-tw-content",
-            payload: {
-              content: content.toString(),
-            },
-          });
-        } catch (e: any) {
-          postWebviewMessage({
-            type: "update-tw-content",
-            payload: {
-              error: e?.message,
-              content: null,
-            },
-          });
-        }
-      } catch (error: any) {
-        vscode.window.showErrorMessage(
-          "Unable to read the given translation word: " + error?.message
-        );
-        postWebviewMessage({
-          type: "update-tw-content",
-          payload: {
-            error: "Not found",
-          },
-        });
-      }
-      break;
-    }
-    default: {
-      break;
-    }
-  }
-};

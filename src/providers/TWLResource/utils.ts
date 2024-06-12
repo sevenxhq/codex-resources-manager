@@ -1,8 +1,9 @@
 import { ConfigResourceValues } from "../../types/codexResource";
 import * as vscode from "vscode";
 
-import { ChapterVerseRef, TwlTsvRow } from "./types";
+import { ChapterVerseRef, Twl, TwlTsvRow } from "./types";
 import { fileExists } from "../../utilities";
+import { TWLResource } from "./provider";
 
 export const getVerseTranslationWordsList = async (
   resource: ConfigResourceValues,
@@ -17,6 +18,8 @@ export const getVerseTranslationWordsList = async (
     vscode.workspace.workspaceFolders?.[0].uri as vscode.Uri,
     resource.localPath
   );
+
+  console.log("resource passed in open", resource);
 
   const bookUri = vscode.Uri.joinPath(resourceDirUri, `twl_${bookID}.tsv`);
   const bookContent = await vscode.workspace.fs.readFile(bookUri);
@@ -81,8 +84,8 @@ export const convertTwlRCUriToScribeResourceUri = async (
     ?.language;
 
   const twResourcesUri = vscode.Uri.joinPath(
-    resourcesUri,
-    `${twlResourceLanguage}_tw`
+    workspaceRootUri,
+    resource.linkedTw.localPath
   );
 
   const twPath = uri.replace("rc://*/tw/dict", twResourcesUri.path);
@@ -149,4 +152,54 @@ export const extractBookChapterVerse = (
         verse: parseInt(match[3], 10),
       }
     : { bookID: "GEN", chapter: 1, verse: 1 };
+};
+
+export const getLinkedTwResource = async (
+  resourceMetadata: Twl
+): Promise<{
+  fullResource: any;
+  resourceType: "codex.tw";
+  display: any;
+} | null> => {
+  const lang = resourceMetadata.language;
+  const owner = resourceMetadata.owner;
+
+  const baseUrl = `https://git.door43.org/api/v1/catalog/search?metadataType=rc&`;
+  const url = `${baseUrl}subject=Translation Words&lang=${lang}`;
+
+  const fetchedData = await fetch(url);
+  const fetchedJson = (await fetchedData.json()) as any;
+
+  const resources = fetchedJson.data;
+
+  if (resources.length === 0) {
+    return null;
+  }
+
+  if (resources.length === 1) {
+    return resources[0];
+  }
+
+  const linkedResource =
+    resources.find((resource: any) => resource.owner === owner) ?? resources[0];
+
+  return {
+    fullResource: linkedResource,
+    resourceType: "codex.tw",
+    display: {
+      id: linkedResource.id.toString(),
+      name: linkedResource.name,
+      owner: {
+        name: linkedResource.repo.owner.full_name,
+        url: linkedResource.repo.owner.website,
+        avatarUrl: linkedResource.repo.owner.avatar_url,
+      },
+      version: {
+        tag: linkedResource.release.tag_name,
+        releaseDate: new Date(linkedResource.released),
+      },
+      fullResource: linkedResource,
+      resourceType: "codex.tw",
+    },
+  };
 };

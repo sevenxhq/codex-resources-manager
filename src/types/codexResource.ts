@@ -58,4 +58,5 @@ export type ConfigResourceValues = {
   remoteUrl: string;
   version: string;
   type: string;
+  [x: string]: any;
 };

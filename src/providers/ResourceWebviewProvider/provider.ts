@@ -86,6 +86,10 @@ export class ResourceWebviewProvider {
     // Set the webview's initial html content
     this._update();
 
+    this.panel.webview.html = this.webviewHandlers.getWebviewContent(
+      this.panel.webview,
+      this.extensionUri
+    );
     // Listen for when the panel is disposed
     // This happens when the user closes the panel or when the panel is closed programmatically
     this.panel.onDidDispose(() => this.dispose(), null, this._disposables);
@@ -93,9 +97,7 @@ export class ResourceWebviewProvider {
     // Update the content based on view changes
     this.panel.onDidChangeViewState(
       (e) => {
-        if (this.panel.visible) {
-          this._update();
-        }
+        this._update();
       },
       null,
       this._disposables
@@ -117,11 +119,6 @@ export class ResourceWebviewProvider {
   }
 
   private _update() {
-    const webview = this.panel.webview;
-    webview.html = this.webviewHandlers.getWebviewContent(
-      webview,
-      this.extensionUri
-    );
     this.webviewHandlers.onWebviewVisible?.(this.panel);
   }
 }

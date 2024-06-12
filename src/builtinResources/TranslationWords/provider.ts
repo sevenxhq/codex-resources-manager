@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 import moment from "moment";
-import { Uri } from "vscode";
+import { Uri, window } from "vscode";
 import { CodexResource, ConfigResourceValues } from "../../types/codexResource";
 import { getNonce, getUri } from "../../utilities";
 
@@ -21,7 +21,6 @@ export class TWResource implements CodexResource<TranslationWordsResourceType> {
       );
 
       await fs.createDirectory(downloadResourceFolder);
-
       const res = await fetch(fullResource?.zipball_url);
       const blob = await res.arrayBuffer();
 
@@ -33,6 +32,7 @@ export class TWResource implements CodexResource<TranslationWordsResourceType> {
       await fs.writeFile(zipUri, Buffer.from(blob));
 
       const fileContents = blob;
+      console.log("Decompressing Zip");
       const result = await JSZip.loadAsync(fileContents);
       const keys = Object.keys(result.files);
 

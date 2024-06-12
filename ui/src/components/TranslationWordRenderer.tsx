@@ -38,7 +38,9 @@ const useTranslationWordContent = (
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    console.log("useEffect");
     vscode.setMessageListeners((event) => {
+      console.log("event in usefect", event.data);
       switch (event.data.type) {
         case "update-tw-content":
           setContent(
